@@ -12,9 +12,10 @@
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script type="text/javascript" id="MathJax-script" async
             src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</script>
 
 </head>
-<body>
+<body id="body">
 <form>
     <div class="input-group p-3">
         <span class="input-group-text" id="basic-addon1">Колличество строк и столбцов: </span>
@@ -66,7 +67,7 @@
         crossorigin="anonymous"></script>
 <script>
     var last_num_numbers = 3;
-
+    var last_check = 0;
     function decide(){
         let array = []
         let result_matrix = []
@@ -86,21 +87,41 @@
             }
         }
         let det = determinant(array)
+        let string = det[1]
+        let ar_comp = ""
+        det = det[0]
+        let text = "$$\\displaylines{\\Delta = "
+        text += "\\begin{vmatrix} "
+        if (array.length >= 4){
+            document.getElementById("body").style.maxWidth = "none";
+            document.getElementById("body").style.width = "auto";
+            document.getElementById("body").style.overflow = "auto";
+        }
         if (det === 0){
+            alert("Определитель равен нулю, решения нет.")
             return null
         }
         for (let i = 0; i < array.length; i++){
             result_matrix.push([])
+            text += array[i].join(" & ") + " \\\\ "
+            if (i % 3 == 2){
+                ar_comp += "\\\\"
+            }
+            ar_comp += "\\begin{split}"
             for (let j = 0; j < array[i].length; j++){
                 let new_arr = JSON.parse(JSON.stringify(array));
                 for (let g = 0; g < array.length; g++) {
                     new_arr[g].splice(j, 1)
                 }
                 new_arr.splice(i, 1)
-                result_matrix[i].push(Math.pow(-1, 2 + i + j) * determinant(new_arr))
+                let det_ = determinant(new_arr)
+                ar_comp += "A_{" + (i + 1) + "" + (j + 1) + "}" + " = (-1)^{" + (2 + i + j) + "} \\cdot " + det_[1] + " = " + Math.pow(-1, 2 + i + j) * det_[0] + "\\\\"
+                result_matrix[i].push(Math.pow(-1, 2 + i + j) * det_[0])
             }
+            ar_comp += "\\end{split} "
+
         }
-        let text = "$$A^{-1} =" + det + " \\cdot \\begin{pmatrix} "
+        text += "\\end{vmatrix} = " + string + " = " + det + "\\\\" + ar_comp + " \\\\\\ A^{-1} =" + det + " \\cdot \\begin{pmatrix}"
         for (let i = 0; i < result_matrix.length; i++){
             for (let j = 0; j < result_matrix.length; j++){
                 text += result_matrix[j][i]
@@ -110,16 +131,24 @@
             }
             text += "\\\\"
         }
-        text += "\\end{pmatrix}$$"
+        text += "\\end{pmatrix}}$$"
+        console.log(text)
         document.getElementById("result").innerText = text
         MathJax.typeset()
+        document.getElementById("body").style.height = "auto";
     }
 
     function determinant(array){
         let result = 0
         let new_arr = JSON.parse(JSON.stringify(array));
+        let text = ""
         if (array.length === 2){
-            return array[0][0] * array[1][1] - array[0][1] * array[1][0]
+            text += "\\begin{vmatrix}"
+            for (let i = 0; i < array.length; i++){
+                text += array[i].join(" & ") + "\\\\"
+            }
+            text += "\\end{vmatrix}"
+            return [array[0][0] * array[1][1] - array[0][1] * array[1][0], text]
         }
         for (let i = 0; i < array.length; i++){
             new_arr = JSON.parse(JSON.stringify(array));
@@ -127,9 +156,18 @@
                 new_arr[g].splice(i, 1)
             }
             new_arr.splice(0, 1)
-            result += array[0][i] * Math.pow(-1, 1 + i + 1) * determinant(new_arr)
+            let det = determinant(new_arr)
+            if (i !== 0 && i !== array.length - 1){
+                if (text.length - last_check > 10){
+                    text += "\\\\"
+                    last_check = text.length;
+                }
+                text += "+"
+            }
+            text += array[0][i].toString() + "\\cdot " + "(-1)^{(" + (1 + i) + " + 1)} \\cdot " + det[1]
+            result += array[0][i] * Math.pow(-1, 1 + i + 1) * det[0]
         }
-        return result
+        return [result, text]
     }
 
     function colsAndRows(num) {

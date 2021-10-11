@@ -8,6 +8,10 @@
           integrity="" crossorigin="anonymous">
     <link href="css/style.css" rel="stylesheet"
           integrity="" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script type="text/javascript" id="MathJax-script" async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 
 </head>
 <body>
@@ -41,12 +45,12 @@
 <div class="accordion px-3" id="BigDad">
     <div class="accordion-item">
         <h2 class="accordion-header" id="Table_head">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+            <button class="accordion-button" type="button" data-bs-toggle="collapse"
                     data-bs-target="#result" aria-expanded="true" aria-controls="collapseOne">
                 Обратная матрица
             </button>
         </h2>
-        <div id="result" class="accordion-collapse collapse p-3" aria-labelledby="Table_head"
+        <div id="result" class="accordion-collapse collapse show p-3" aria-labelledby="Table_head"
              data-bs-parent="#BigDad">
             Привет, скорее всего ты здесь первый раз, поэтому давай введу тебя в курс дела. Выше ты уже можешь увидеть
             матрицу 3х3 и возможность изменения её размера. Советую пока не делать матрицу слишком большой, тебе долго
@@ -93,10 +97,22 @@
                     new_arr[g].splice(j, 1)
                 }
                 new_arr.splice(i, 1)
-                result_matrix[i].push(Math.pow(-1, 1 + i + 1) * determinant(new_arr))
+                result_matrix[i].push(Math.pow(-1, 2 + i + j) * determinant(new_arr))
             }
         }
-        console.log(result_matrix)
+        let text = "$$A^{-1} =" + det + " \\cdot \\begin{pmatrix} "
+        for (let i = 0; i < result_matrix.length; i++){
+            for (let j = 0; j < result_matrix.length; j++){
+                text += result_matrix[j][i]
+                if (j !== result_matrix.length - 1){
+                    text += " & "
+                }
+            }
+            text += "\\\\"
+        }
+        text += "\\end{pmatrix}$$"
+        document.getElementById("result").innerText = text
+        MathJax.typeset()
     }
 
     function determinant(array){

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Matrix</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet"
+          integrity="" crossorigin="anonymous">
+    <link href="css/style.css" rel="stylesheet"
+          integrity="" crossorigin="anonymous">
+
+</head>
+<body>
+<form>
+    <div class="input-group p-3">
+        <span class="input-group-text" id="basic-addon1">Колличество строк и столбцов: </span>
+        <input type="number" class="form-control" min="2" id="-1" aria-label="nums" aria-describedby="basic-addon1"
+               inputmode="decimal" style="text-align: center" value="3" name="colss" onchange="colsAndRows(this.value)">
+    </div>
+</form>
+<div id="cols">
+    <div class="input-group px-2 pb-1" id="0">
+        <input value="0" type="number" class="form-control mx-2" aria-label="nums">
+        <input value="0" type="number" class="form-control mx-2" aria-label="nums">
+        <input value="0" type="number" class="form-control mx-2" aria-label="nums">
+    </div>
+    <div class="input-group px-2 pb-1" id="1">
+        <input value="0" type="number" class="form-control mx-2" aria-label="nums">
+        <input value="0" type="number" class="form-control mx-2" aria-label="nums">
+        <input value="0" type="number" class="form-control mx-2" aria-label="nums">
+    </div>
+    <div class="input-group px-2 pb-1" id="2">
+        <input value="0" type="number" class="form-control mx-2" aria-label="nums">
+        <input value="0" type="number" class="form-control mx-2" aria-label="nums">
+        <input value="0" type="number" class="form-control mx-2" aria-label="nums">
+    </div>
+</div>
+<div class="d-flex flex-row-reverse justify-content-between px-3 pb-2 py-2">
+    <button class="btn btn-outline-primary" type="submit" onclick="decide()">Решить</button>
+</div>
+<div class="accordion px-3" id="BigDad">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="Table_head">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#result" aria-expanded="true" aria-controls="collapseOne">
+                Обратная матрица
+            </button>
+        </h2>
+        <div id="result" class="accordion-collapse collapse p-3" aria-labelledby="Table_head"
+             data-bs-parent="#BigDad">
+            Привет, скорее всего ты здесь первый раз, поэтому давай введу тебя в курс дела. Выше ты уже можешь увидеть
+            матрицу 3х3 и возможность изменения её размера. Советую пока не делать матрицу слишком большой, тебе долго
+            вводить и я не обработал ошибку дизайна. Но вернёмся к теме, тебе надо ввести значения элементов матрицы, а
+            мой сайт вычислит обратную матрицу и покажет тебе подробное решение.
+        </div>
+    </div>
+</div>
+</body>
+
+<script src="js/bootstrap.bundle.min.js"
+        integrity=""
+        crossorigin="anonymous"></script>
+<script>
+    var last_num_numbers = 3;
+
+    function decide(){
+        let array = []
+        let result_matrix = []
+        let colsNum = document.getElementById("-1").value
+        for (let i = 0; i < colsNum + 1; i++) {
+            el = document.getElementById(i.toString())
+            try {
+                let elementChildrens = el.children
+                array.push([])
+                if (elementChildrens.length >= 2) {
+                    for (let i = 0; i < elementChildrens.length; i++) {
+                        array[array.length - 1].push(parseInt(elementChildrens[i].value))
+                    }
+                }
+            } catch (e) {
+                console.log(e)
+            }
+        }
+        let det = determinant(array)
+        if (det === 0){
+            return null
+        }
+        for (let i = 0; i < array.length; i++){
+            result_matrix.push([])
+            for (let j = 0; j < array[i].length; j++){
+                let new_arr = JSON.parse(JSON.stringify(array));
+                for (let g = 0; g < array.length; g++) {
+                    new_arr[g].splice(j, 1)
+                }
+                new_arr.splice(i, 1)
+                result_matrix[i].push(Math.pow(-1, 1 + i + 1) * determinant(new_arr))
+            }
+        }
+        console.log(result_matrix)
+    }
+
+    function determinant(array){
+        let result = 0
+        let new_arr = JSON.parse(JSON.stringify(array));
+        if (array.length === 2){
+            return array[0][0] * array[1][1] - array[0][1] * array[1][0]
+        }
+        for (let i = 0; i < array.length; i++){
+            new_arr = JSON.parse(JSON.stringify(array));
+            for (let g = 0; g < array.length; g++) {
+                new_arr[g].splice(i, 1)
+            }
+            new_arr.splice(0, 1)
+            result += array[0][i] * Math.pow(-1, 1 + i + 1) * determinant(new_arr)
+        }
+        return result
+    }
+
+    function colsAndRows(num) {
+        let array = []
+        let colsNum = document.getElementById("-1").value
+        for (let i = 0; i < colsNum + 1; i++) {
+            el = document.getElementById(i.toString())
+            try {
+                let elementChildrens = el.children
+                array.push([])
+                if (elementChildrens.length >= 2) {
+                    for (let i = 0; i < elementChildrens.length; i++) {
+                        array[array.length - 1].push(elementChildrens[i].value)
+                    }
+                }
+            } catch (e) {
+                console.log(e)
+            }
+        }
+
+        num = parseInt(num)
+        console.log(num)
+        console.log(array)
+        if (num >= 2) {
+            last_num_numbers += 1
+            document.getElementById("cols").innerHTML = null
+            for (let g = 0; g < num; g++) {
+                document.getElementById("cols").insertAdjacentHTML("beforeend", '<div class="input-group px-2 pb-1" id="' + g.toString() + '">\n' +
+                    '            <input value="0" type="number" class="form-control mx-2" aria-label="nums">'.repeat(num) +
+                    '        </div>')
+            }
+            let colsNum = document.getElementById("-1").value
+            for (let i = 0; i < colsNum; i++) {
+
+                el = document.getElementById(i.toString())
+                try {
+                    if (array.length === 0) {
+                        break
+                    }
+                    let elementChildrens = el.children
+                    for (let j = 0; j < elementChildrens.length; j++) {
+                        if (array[i][j] == null || array[i][j] === "") {
+                            continue
+                        }
+                        elementChildrens[j].value = array[i][j]
+                    }
+
+                } catch (e) {
+                    console.log(e)
+                }
+                last_num_numbers = num - 1
+            }
+        }
+    }
+
+</script>
+</html>
